@@ -1,0 +1,56 @@
+# CAP
+node_modules/
+target/
+_out/
+gen/
+*.db
+*.sqlite
+*.sqlite-journal
+db.sqlite*
+
+# Configuration
+.cdsrc-private.json
+default-*.json
+
+# Environment
+.env
+.env.local
+*.local
+
+# MTA
+mta_archives/
+*_mta_build_tmp
+*.mtar
+
+# IDE
+.vscode/
+.idea/
+*.iml
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+*.log.*
+
+# Credentials & Secrets
+credentials.json
+*.p12
+*.pem
+*.key
+*-credentials.json
+
+# AI Core (future)
+ai-core/credentials/
+
+# Build
+dist/
+
+# Temporary
+.tmp/
+temp/
+*.tmp
+.cache/
+
+# @cap-js/cds-typer
+@cds-models

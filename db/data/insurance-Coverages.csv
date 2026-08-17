@@ -1,0 +1,31 @@
+ID,policy_ID,coverageName,description,coverageAmount,isActive,createdAt,createdBy,modifiedAt,modifiedBy
+cv001,24970009-c6cd-4a31-a278-423e2e34a59e,Morte Acidental,Cobertura em caso de morte por acidente de qualquer natureza,500000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv002,24970009-c6cd-4a31-a278-423e2e34a59e,Invalidez Permanente,Cobertura total em caso de invalidez permanente por acidente,500000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv003,24970009-c6cd-4a31-a278-423e2e34a59e,Doencas Graves,Cobertura para diagnostico de cancer e doencas graves,200000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv004,24970010-0c93-40c9-bc9c-17ec1dbf7943,Colisao,"Cobertura contra danos causados por colisao, capotamento ou tombamento",80000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv005,24970010-0c93-40c9-bc9c-17ec1dbf7943,Roubo e Furto,Cobertura contra roubo ou furto total e parcial do veiculo,80000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv006,24970010-0c93-40c9-bc9c-17ec1dbf7943,Vidros,"Cobertura para para-brisa, vidros laterais e traseiro",5000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv007,24970010-0c93-40c9-bc9c-17ec1dbf7943,Danos a Terceiros,Cobertura de responsabilidade civil para danos materiais e corporais,50000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv008,24970010-0c93-40c9-bc9c-17ec1dbf7943,Fenomenos Naturais,"Cobertura para danos causados por enchentes, granizo e vendavais",30000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv009,24970011-1dc0-4015-9aa8-6de1f7777e5c,Incendio,Cobertura contra incendio estrutural e danos ao imovel,350000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv010,24970011-1dc0-4015-9aa8-6de1f7777e5c,Roubo e Furto,Cobertura contra furto e roubo de eletrodomesticos e moveis,50000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv011,24970011-1dc0-4015-9aa8-6de1f7777e5c,Danos Eletricos,Cobertura contra danos eletricos em aparelhos e instalacoes,30000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv012,24970011-1dc0-4015-9aa8-6de1f7777e5c,Responsabilidade Civil,Cobertura de danos causados a terceiros no imovel,100000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv013,24970011-1dc0-4015-9aa8-6de1f7777e5c,Alagamento,Cobertura para danos causados por infiltracoes e alagamentos,80000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv014,24970012-380f-4fff-adc3-a6a4c1f362a2,Colisao,"Cobertura contra danos por colisao, capotamento ou tombamento",120000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv015,24970012-380f-4fff-adc3-a6a4c1f362a2,Roubo e Furto Total,Cobertura contra roubo ou furto total do veiculo,120000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv016,24970012-380f-4fff-adc3-a6a4c1f362a2,Danos a Terceiros,Cobertura de responsabilidade civil danos materiais e corporais,80000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv017,24970012-380f-4fff-adc3-a6a4c1f362a2,Vidros e Retrovisores,Cobertura para todos os vidros e retrovisores,8000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv018,24970013-0c14-446f-a1e5-f4b51ac4f8ca,Internacao Hospitalar,Cobertura de internacoes hospitalares em toda a rede credenciada,200000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv019,24970013-0c14-446f-a1e5-f4b51ac4f8ca,Consultas Medicas,Cobertura para consultas em clinica geral e especialidades,50000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv020,24970013-0c14-446f-a1e5-f4b51ac4f8ca,Exames e Procedimentos,Cobertura para exames laboratoriais e de imagem,30000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv021,24970014-b7a4-4f9d-bf89-c53130bd3bb7,Colisao,Cobertura contra danos por colisao e capotamento,95000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv022,24970014-b7a4-4f9d-bf89-c53130bd3bb7,Roubo Parcial e Total,Cobertura contra roubo e furto,95000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv023,24970014-b7a4-4f9d-bf89-c53130bd3bb7,Danos a Terceiros,Responsabilidade civil danos a terceiros,50000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv024,24970015-87ee-4120-937c-cb6f8a3c845a,Incendio e Explosao,"Cobertura contra incendio, explosao e queda de raio",280000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv025,24970015-87ee-4120-937c-cb6f8a3c845a,Roubo Conteudo,Cobertura contra roubo de moveis e eletrodomesticos,80000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv026,24970015-87ee-4120-937c-cb6f8a3c845a,Vendaval e Granizo,Cobertura para danos causados por vendaval e queda de objetos,60000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv027,24970016-ba9d-430b-85e2-e467390fc30b,Incendio Comercial,Cobertura incendio para estabelecimento comercial,1000000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv028,24970016-ba9d-430b-85e2-e467390fc30b,Equipamentos e Maquinas,Cobertura para equipamentos e maquinario do negocio,500000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv029,24970016-ba9d-430b-85e2-e467390fc30b,Responsabilidade Civil,Cobertura RC para danos a clientes e terceiros no estabelecimento,500000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
+cv030,24970017-29ca-4626-8e84-8a6253d864f9,Morte Natural,Cobertura em caso de morte por doenca,300000.00,true,2024-01-01T10:00:00Z,admin,2024-01-01T10:00:00Z,admin
