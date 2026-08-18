@@ -86,11 +86,10 @@ resources:
 
   - name: ps-customer-ext-db
     type: com.sap.xs.hana-schema
+    path: gen/db
     parameters:
       service: hana
       service-plan: hdi-shared
-      config:
-        database_id: ~{hana-cloud-tools/DATABASE_ID}
     requires:
       - hana-cloud-tools
 
