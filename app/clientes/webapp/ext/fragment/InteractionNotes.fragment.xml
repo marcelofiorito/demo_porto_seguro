@@ -1,0 +1,41 @@
+<core:FragmentDefinition
+  xmlns="sap.m"
+  xmlns:core="sap.ui.core">
+
+  <VBox id="notesVBox" class="sapUiSmallMargin">
+
+    <Toolbar id="notesToolbar">
+      <Title id="notesTitle" text="Interações Registradas" level="H5"/>
+    </Toolbar>
+
+    <List id="notesList"
+      items="{notes}"
+      noDataText="Nenhuma interação registrada para este cliente."
+      showSeparators="All">
+      <items>
+        <CustomListItem id="notesListItem" type="Inactive">
+          <VBox id="notesItemVBox" class="sapUiSmallMarginBegin sapUiSmallMarginEnd sapUiSmallMarginTopBottom">
+            <HBox id="notesItemHeader" alignItems="Center" justifyContent="SpaceBetween">
+              <ObjectStatus id="notesTypeStatus"
+                text="{noteType}"
+                inverted="true"/>
+              <HBox id="notesItemMeta" alignItems="Center">
+                <core:Icon id="notesCalIcon" src="sap-icon://calendar" class="sapUiTinyMarginEnd"/>
+                <Text id="notesCreatedAt" text="{createdAt}" class="sapUiTinyMarginEnd"/>
+                <Text id="notesCreatedBy" text="{createdBy}"/>
+              </HBox>
+            </HBox>
+            <Text id="notesText" text="{noteText}" wrapping="true" class="sapUiSmallMarginTop"/>
+            <HBox id="notesFollowUp" class="sapUiSmallMarginTop" alignItems="Center">
+              <core:Icon id="notesFollowIcon" src="sap-icon://forward" class="sapUiTinyMarginEnd"/>
+              <Label id="notesFollowLabel" text="Acompanhamento: "/>
+              <Text id="notesFollowDate" text="{followUpDate}" class="sapUiTinyMarginEnd"/>
+              <CheckBox id="notesResolved" text="Resolvido" selected="{resolved}" editable="false" class="sapUiSmallMarginBegin"/>
+            </HBox>
+          </VBox>
+        </CustomListItem>
+      </items>
+    </List>
+
+  </VBox>
+</core:FragmentDefinition>

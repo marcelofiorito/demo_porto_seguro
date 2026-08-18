@@ -1,0 +1,40 @@
+<core:FragmentDefinition
+  xmlns="sap.m"
+  xmlns:core="sap.ui.core">
+
+  <VBox id="riskVBox" class="sapUiSmallMargin">
+    <HBox id="riskRow1" wrap="Wrap" class="sapUiSmallMarginBottom">
+
+      <VBox id="riskCol1" class="sapUiMediumMarginEnd sapUiSmallMarginBottom">
+        <Label id="lblRiskLevel" text="Nível de Risco" design="Bold"/>
+        <ObjectStatus id="riskLevelStatus"
+          text="{riskLevel}"
+          state="{= ${riskLevel} === 'CRITICO' || ${riskLevel} === 'ALTO' ? 'Error' : ${riskLevel} === 'MEDIO' ? 'Warning' : ${riskLevel} === 'BAIXO' ? 'Success' : 'None' }"
+          inverted="true"
+          class="sapUiTinyMarginTop"/>
+      </VBox>
+
+      <VBox id="riskCol2" class="sapUiMediumMarginEnd sapUiSmallMarginBottom">
+        <Label id="lblSegment" text="Segmento" design="Bold"/>
+        <Text id="segmentText" text="{segment}" class="sapUiTinyMarginTop"/>
+      </VBox>
+
+      <VBox id="riskCol3" class="sapUiMediumMarginEnd sapUiSmallMarginBottom">
+        <Label id="lblOwner" text="Responsável" design="Bold"/>
+        <Text id="ownerText" text="{owner}" class="sapUiTinyMarginTop"/>
+      </VBox>
+
+      <VBox id="riskCol4" class="sapUiSmallMarginBottom">
+        <Label id="lblReviewDate" text="Data de Revisão" design="Bold"/>
+        <Text id="reviewDateText" text="{reviewDate}" class="sapUiTinyMarginTop"/>
+      </VBox>
+
+    </HBox>
+
+    <VBox id="riskRow2">
+      <Label id="lblRiskReason" text="Motivo do Risco" design="Bold"/>
+      <Text id="riskReasonText" text="{riskReason}" wrapping="true" class="sapUiTinyMarginTop"/>
+    </VBox>
+  </VBox>
+
+</core:FragmentDefinition>

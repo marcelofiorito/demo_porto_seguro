@@ -1,0 +1,8 @@
+businessPartner,riskLevel,riskReason,segment,owner,reviewDate,createdAt,createdBy,modifiedAt,modifiedBy
+1000000,ALTO,Histórico de sinistros frequentes - 3 ocorrências no último semestre,AUTO,Ana Lima,2026-09-15,2026-01-10T09:00:00Z,sistema,2026-08-10T09:00:00Z,ana.lima@portoseguro.com.br
+1000011,CRITICO,Investigação de possível fraude em sinistro de veículo em andamento,EMPRESARIAL,Beatriz Costa,2026-08-20,2026-03-01T10:00:00Z,sistema,2026-08-12T08:00:00Z,beatriz.costa@portoseguro.com.br
+1000020,MEDIO,Pendência financeira em aberto - 2 parcelas de prêmio em atraso,VIDA,Carlos Souza,2026-09-01,2026-04-15T13:00:00Z,sistema,2026-08-05T10:00:00Z,carlos.souza@portoseguro.com.br
+1000030,BAIXO,Cliente premium sem ocorrências há 5 anos - perfil fidelidade,RESIDENCIAL,Ana Lima,2026-12-01,2026-06-20T08:00:00Z,sistema,2026-07-30T11:00:00Z,ana.lima@portoseguro.com.br
+14100001,ALTO,Renovação de apólice vencida há 30 dias sem confirmação do cliente,AUTO,Carlos Souza,2026-08-30,2026-02-10T10:00:00Z,sistema,2026-08-01T14:30:00Z,carlos.souza@portoseguro.com.br
+14100002,MEDIO,Mudança de endereço para área de alto risco - reavaliação pendente,RESIDENCIAL,Beatriz Costa,2026-09-10,2026-02-10T10:00:00Z,sistema,2026-08-08T15:00:00Z,beatriz.costa@portoseguro.com.br
+14100003,BAIXO,Contrato de saúde coletiva estável - sem ocorrências relevantes,SAUDE,Ana Lima,2026-12-31,2026-02-10T08:00:00Z,sistema,2026-07-15T10:00:00Z,ana.lima@portoseguro.com.br

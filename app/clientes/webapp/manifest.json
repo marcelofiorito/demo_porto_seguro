@@ -1,0 +1,113 @@
+{
+  "_version": "1.8.0",
+  "sap.app": {
+    "id": "com.portoseguro.clientes",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "title": "{appTitle}",
+    "description": "{appDescription}",
+    "applicationVersion": { "version": "1.0.0" },
+    "dataSources": {
+      "mainService": {
+        "uri": "/odata/v4/porto-seguro/",
+        "type": "OData",
+        "settings": { "odataVersion": "4.0" }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "fullWidth": true,
+    "deviceTypes": { "desktop": true, "tablet": true, "phone": true }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.120.0",
+      "libs": {
+        "sap.ui.core": {},
+        "sap.fe.templates": {}
+      }
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "uri": "i18n/i18n.properties"
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "autoExpandSelect": false,
+          "earlyRequests": true,
+          "groupId": "$direct"
+        }
+      }
+    },
+    "routing": {
+      "routes": [
+        {
+          "pattern": ":?query:",
+          "name": "CustomerList",
+          "target": "CustomerList"
+        },
+        {
+          "pattern": "Customers({key}):?query:",
+          "name": "CustomerObjectPage",
+          "target": "CustomerObjectPage"
+        }
+      ],
+      "targets": {
+        "CustomerList": {
+          "type": "Component",
+          "id": "CustomerList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/Customers",
+              "initialLoad": true,
+              "navigation": {
+                "Customers": {
+                  "detail": {
+                    "route": "CustomerObjectPage"
+                  }
+                }
+              },
+              "controlConfiguration": {
+                "@com.sap.vocabularies.UI.v1.LineItem": {
+                  "tableSettings": {
+                    "type": "ResponsiveTable",
+                    "selectionMode": "Single"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "CustomerObjectPage": {
+          "type": "Component",
+          "id": "CustomerObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/Customers",
+              "content": {
+                "body": {
+                  "sections": {
+                    "RiskClassificationSection": {
+                      "title": "Classificar Risco",
+                      "template": "com.portoseguro.clientes.ext.fragment.RiskClassification"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "contentDensities": { "compact": true, "cozy": true }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "_version": "1.60.0",
+  "sap.app": {
+    "id": "com.portoseguro.dashboard",
+    "type": "application",
+    "title": "Porto Seguro – Dashboard Executivo",
+    "description": "Visão gerencial de classificação de risco da carteira de clientes",
+    "applicationVersion": { "version": "1.0.0" },
+    "dataSources": {
+      "mainService": {
+        "uri": "/odata/v4/porto-seguro/",
+        "type": "OData",
+        "settings": { "odataVersion": "4.0" }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": { "icon": "sap-icon://manager-insight" },
+    "deviceTypes": { "desktop": true, "tablet": true, "phone": false }
+  },
+  "sap.ui5": {
+    "rootView": {
+      "viewName": "com.portoseguro.dashboard.view.Main",
+      "type": "XML",
+      "async": true,
+      "id": "mainView"
+    },
+    "dependencies": {
+      "minUI5Version": "1.120.0",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.ui.layout": {},
+        "sap.viz": {}
+      }
+    },
+    "contentDensities": { "compact": true, "cozy": true },
+    "models": {
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      },
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": { "bundleName": "com.portoseguro.dashboard.i18n.i18n" }
+      }
+    }
+  }
+}

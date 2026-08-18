@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+
+# CAP build output
+gen/
+
+# SQLite (dev only)
+*.sqlite
+*.db
+
+# Environment / secrets
+.env
+.cdsrc-private.json
+
+# MTA build archives
+*.mtar
+mta_archives/
+.mta_build_tmp/
+*_mta_build_tmp/
+
+# Playwright / test screenshots
+.playwright-mcp/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Claude
+.claude/
+
+# Screenshots (demo assets, opcionais — remova se quiser versioná-los)
+*.png

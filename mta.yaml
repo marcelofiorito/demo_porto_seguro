@@ -1,0 +1,105 @@
+_schema-version: '3.1'
+ID: porto-seguro-customer-ext
+version: 1.0.0
+description: Porto Seguro – Extensão de Clientes S/4HANA via SAP BTP
+
+parameters:
+  enable-parallel-deployments: true
+
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm ci --production
+        - npx cds build --production
+
+modules:
+
+  # ── CAP Backend ────────────────────────────────────────────────────────────
+  - name: ps-customer-ext-srv
+    type: nodejs
+    path: gen/srv
+    parameters:
+      buildpack: nodejs_buildpack
+      memory: 512M
+      disk-quota: 512M
+    build-parameters:
+      builder: npm-ci
+    requires:
+      - name: ps-customer-ext-uaa
+      - name: ps-customer-ext-db
+      - name: ps-customer-ext-destination
+    provides:
+      - name: srv-api
+        properties:
+          srv-url: ${default-url}
+
+  # ── HANA DB Deployer ───────────────────────────────────────────────────────
+  - name: ps-customer-ext-db-deployer
+    type: hdb
+    path: gen/db
+    parameters:
+      buildpack: nodejs_buildpack
+    requires:
+      - name: ps-customer-ext-db
+
+  # ── AppRouter ──────────────────────────────────────────────────────────────
+  - name: ps-customer-ext-approuter
+    type: approuter.nodejs
+    path: app/router
+    parameters:
+      disk-quota: 256M
+      memory: 256M
+    requires:
+      - name: ps-customer-ext-uaa
+      - name: srv-api
+        group: destinations
+        properties:
+          name: srv-api
+          url: ~{srv-url}
+          forwardAuthToken: true
+    build-parameters:
+      builder: npm-ci
+
+resources:
+
+  # ── XSUAA ──────────────────────────────────────────────────────────────────
+  - name: ps-customer-ext-uaa
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: ./xs-security.json
+      config:
+        xsappname: porto-seguro-customer-ext-${org}-${space}
+        tenant-mode: dedicated
+
+  # ── HANA Cloud (HDI) ───────────────────────────────────────────────────────
+  - name: ps-customer-ext-db
+    type: com.sap.xs.hana-schema
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+      config:
+        database_id: ~{hana-cloud-tools/DATABASE_ID}
+    requires:
+      - name: hana-cloud-tools
+
+  - name: hana-cloud-tools
+    type: org.cloudfoundry.existing-service
+    parameters:
+      service-name: hana-cloud
+
+  # ── Destination ────────────────────────────────────────────────────────────
+  - name: ps-customer-ext-destination
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: destination
+      service-plan: lite
+
+  # ── Connectivity ───────────────────────────────────────────────────────────
+  - name: ps-customer-ext-connectivity
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: connectivity
+      service-plan: lite

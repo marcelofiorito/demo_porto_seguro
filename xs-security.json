@@ -1,0 +1,27 @@
+{
+  "xsappname": "porto-seguro-customer-ext",
+  "tenant-mode": "dedicated",
+  "description": "Porto Seguro – Extensão de Clientes",
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.CustomerViewer",
+      "description": "Visualizar dados de clientes e perfil de risco"
+    },
+    {
+      "name": "$XSAPPNAME.CustomerEditor",
+      "description": "Editar classificação de risco e registrar interações"
+    }
+  ],
+  "role-templates": [
+    {
+      "name": "CustomerViewer",
+      "description": "Consulta de carteira de clientes",
+      "scope-references": ["$XSAPPNAME.CustomerViewer"]
+    },
+    {
+      "name": "CustomerEditor",
+      "description": "Gestão de risco e histórico de interações",
+      "scope-references": ["$XSAPPNAME.CustomerViewer", "$XSAPPNAME.CustomerEditor"]
+    }
+  ]
+}
