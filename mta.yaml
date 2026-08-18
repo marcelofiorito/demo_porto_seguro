@@ -13,6 +13,9 @@ build-parameters:
         - npm ci --production
         - npx cds build --production
 
+parameters:
+  deploy_mode: html5-repo
+
 modules:
 
   # ── CAP Backend ────────────────────────────────────────────────────────────
@@ -40,23 +43,56 @@ modules:
     path: gen/db
     parameters:
       buildpack: nodejs_buildpack
-    requires:
-      - name: ps-customer-ext-db
-
-  # ── AppRouter ──────────────────────────────────────────────────────────────
-  - name: ps-customer-ext-approuter
-    type: approuter.nodejs
-    path: app/router
+  # ── HTML5 Repo Host / App Content ───────────────────────────────────
+  - name: ps-customer-ext-html5-host
+    type: html5-apps-repo-host
+    path: app
+    properties:
+      content-target: true
     parameters:
-      disk-quota: 256M
-      memory: 256M
+      buildpack: nodejs_buildpack
     requires:
       - name: ps-customer-ext-uaa
-      - name: srv-api
-        group: destinations
-        properties:
-          name: srv-api
-          url: ~{srv-url}
+  
+  # ── App Content (HTML5 Repo) ─────────────────────────────────────────
+  - name: ps-customer-ext-appcontent
+    type: com.sap.application.content
+    path: gen
+    requires:
+      - name: ps-customer-ext-destination
+      - name: ps-customer-ext-html5-host
+    build-parameters:
+      build-result: app/
+      requires:
+        - name: network-ovp
+          artifacts: [network-ovp.zip]
+          target-path: app/
+        - name: stockout
+          artifacts: [stockout.zip]
+          target-path: app/
+        - name: store-performance
+          artifacts: [store-performance.zip]
+          target-path: app/
+        - name: franchisee-ovp
+          artifacts: [franchisee-ovp.zip]
+          target-path: app/
+        - name: orders
+          artifacts: [orders.zip]
+          target-path: app/
+        - name: demo-admin
+          artifacts: [demo-admin.zip]
+          target-path: app/
+        - name: sac-story
+          artifacts: [sac-story.zip]
+          target-path: app/
+  
+  # ── HTML5 Repo Runtime ───────────────────────────────────────────
+  - name: ps-customer-ext-html5-runtime
+    type: html5-apps-repo-runtime
+    path: app
+    requires:
+      - name: ps-customer-ext-uaa
+      - name: ps-customer-ext-appcontent
           forwardAuthToken: true
     build-parameters:
       builder: npm-ci
