@@ -5,6 +5,7 @@ description: Porto Seguro – Extensão de Clientes S/4HANA via SAP BTP
 
 parameters:
   enable-parallel-deployments: true
+  deploy_mode: html5-repo
 
 build-parameters:
   before-all:
@@ -13,21 +14,13 @@ build-parameters:
         - npm ci --production
         - npx cds build --production
 
-parameters:
-  deploy_mode: html5-repo
-
 modules:
-
-  # ── CAP Backend ────────────────────────────────────────────────────────────
   - name: ps-customer-ext-srv
     type: nodejs
     path: gen/srv
     parameters:
-      buildpack: nodejs_buildpack
       memory: 512M
       disk-quota: 512M
-    build-parameters:
-      builder: npm-ci
     requires:
       - name: ps-customer-ext-uaa
       - name: ps-customer-ext-db
@@ -37,24 +30,21 @@ modules:
         properties:
           srv-url: ${default-url}
 
-  # ── HANA DB Deployer ───────────────────────────────────────────────────────
   - name: ps-customer-ext-db-deployer
     type: hdb
     path: gen/db
     parameters:
-      buildpack: nodejs_buildpack
-  # ── HTML5 Repo Host / App Content ───────────────────────────────────
+      memory: 256M
+      disk-quota: 256M
+
   - name: ps-customer-ext-html5-host
     type: html5-apps-repo-host
     path: app
     properties:
       content-target: true
-    parameters:
-      buildpack: nodejs_buildpack
     requires:
       - name: ps-customer-ext-uaa
-  
-  # ── App Content (HTML5 Repo) ─────────────────────────────────────────
+
   - name: ps-customer-ext-appcontent
     type: com.sap.application.content
     path: gen
@@ -62,44 +52,16 @@ modules:
       - name: ps-customer-ext-destination
       - name: ps-customer-ext-html5-host
     build-parameters:
-      build-result: app/
-      requires:
-        - name: network-ovp
-          artifacts: [network-ovp.zip]
-          target-path: app/
-        - name: stockout
-          artifacts: [stockout.zip]
-          target-path: app/
-        - name: store-performance
-          artifacts: [store-performance.zip]
-          target-path: app/
-        - name: franchisee-ovp
-          artifacts: [franchisee-ovp.zip]
-          target-path: app/
-        - name: orders
-          artifacts: [orders.zip]
-          target-path: app/
-        - name: demo-admin
-          artifacts: [demo-admin.zip]
-          target-path: app/
-        - name: sac-story
-          artifacts: [sac-story.zip]
-          target-path: app/
-  
-  # ── HTML5 Repo Runtime ───────────────────────────────────────────
+      no-source: true
+
   - name: ps-customer-ext-html5-runtime
     type: html5-apps-repo-runtime
     path: app
     requires:
       - name: ps-customer-ext-uaa
       - name: ps-customer-ext-appcontent
-          forwardAuthToken: true
-    build-parameters:
-      builder: npm-ci
 
 resources:
-
-  # ── XSUAA ──────────────────────────────────────────────────────────────────
   - name: ps-customer-ext-uaa
     type: org.cloudfoundry.managed-service
     parameters:
@@ -110,7 +72,18 @@ resources:
         xsappname: porto-seguro-customer-ext-${org}-${space}
         tenant-mode: dedicated
 
-  # ── HANA Cloud (HDI) ───────────────────────────────────────────────────────
+  - name: ps-customer-ext-destination
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: destination
+      service-plan: lite
+
+  - name: ps-customer-ext-connectivity
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: connectivity
+      service-plan: lite
+
   - name: ps-customer-ext-db
     type: com.sap.xs.hana-schema
     parameters:
@@ -119,23 +92,9 @@ resources:
       config:
         database_id: ~{hana-cloud-tools/DATABASE_ID}
     requires:
-      - name: hana-cloud-tools
+      - hana-cloud-tools
 
   - name: hana-cloud-tools
     type: org.cloudfoundry.existing-service
     parameters:
       service-name: hana-cloud
-
-  # ── Destination ────────────────────────────────────────────────────────────
-  - name: ps-customer-ext-destination
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: destination
-      service-plan: lite
-
-  # ── Connectivity ───────────────────────────────────────────────────────────
-  - name: ps-customer-ext-connectivity
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: connectivity
-      service-plan: lite
