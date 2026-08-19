@@ -185,6 +185,15 @@ const RISK_CRITICALITY = {
   CRITICO: 1
 };
 
+// Clientes priorizados na lista para a demonstração. A ordem dos IDs define
+// a ordem de exibição, incluindo os BPs duplicados de cada pessoa.
+const PRIORITY_BUSINESS_PARTNERS = [
+  "9980000098",
+  "9980000099",
+  "9980000096",
+  "9980000097"
+];
+
 // Referências às entidades do schema (nomes qualificados para uso com db.run)
 const DB_RISK = "com.portoseguro.CustomerRisk";
 const DB_NOTE = "com.portoseguro.CustomerNote";
@@ -200,29 +209,80 @@ module.exports = class CustomerService extends cds.ApplicationService {
     // ── READ Customers ────────────────────────────────────────────────
     this.on("READ", "Customers", async (req) => {
       let bps;
+      let risks;
+      const isSingle = req.query.SELECT?.one === true;
+      const virtualFilters = _extractVirtualEquals(req.query.SELECT?.where);
+
+      // Os campos virtuais pertencem à extensão local. Resolve primeiro os BPs
+      // correspondentes e restringe a consulta remota por BusinessPartner.
+      if (virtualFilters.size > 0) {
+        const riskQuery = SELECT.from(DB_RISK);
+        for (const [field, values] of virtualFilters) {
+          riskQuery.where({ [field]: { in: [...values] } });
+        }
+        risks = await db.run(riskQuery);
+        if (risks.length === 0) return isSingle ? null : [];
+      }
 
       if (isProduction) {
         const S4 = await cds.connect.to("API_BUSINESS_PARTNER");
         // Remove campos virtuais da query antes de enviar ao S/4HANA
         const query = _stripVirtualFields(req.query);
-        bps = await S4.run(query);
-        if (!Array.isArray(bps)) bps = bps ? [bps] : [];
+        if (risks) {
+          _addBusinessPartnerFilter(query, risks.map((risk) => risk.businessPartner));
+        }
+
+        if (isSingle) {
+          // Leituras da Object Page já endereçam um BP pela chave. O S/4HANA
+          // não permite acrescentar $top/$skip a essa URI singleton.
+          bps = _asArray(await S4.run(query));
+        } else {
+          // Busca os clientes prioritários separadamente para que estejam no
+          // início global da coleção, e não apenas no início da página corrente.
+          const priorityBPs = _sortPriorityBusinessPartners((await Promise.all(
+            PRIORITY_BUSINESS_PARTNERS.map(async (businessPartner) => {
+              const priorityQuery = cds.ql.clone(query);
+              _setPaging(priorityQuery, 1, 0);
+              _addBusinessPartnerFilter(priorityQuery, [businessPartner]);
+              return _asArray(await S4.run(priorityQuery));
+            })
+          )).flat());
+
+          const { top, skip } = _getPaging(query);
+          const visiblePriorityBPs = priorityBPs.slice(skip, top === null ? undefined : skip + top);
+          const remainingTop = top === null ? null : top - visiblePriorityBPs.length;
+
+          let regularBPs = [];
+          if (remainingTop === null || remainingTop > 0) {
+            const regularQuery = cds.ql.clone(query);
+            _addBusinessPartnerExclusion(regularQuery, PRIORITY_BUSINESS_PARTNERS);
+            _setPaging(regularQuery, remainingTop, Math.max(0, skip - priorityBPs.length));
+            regularBPs = _asArray(await S4.run(regularQuery));
+          }
+
+          bps = [...visiblePriorityBPs, ...regularBPs];
+        }
       } else {
-        bps = _applyMockFilters(MOCK_BUSINESS_PARTNERS, req.query);
+        bps = _applyMockFilters(MOCK_BUSINESS_PARTNERS, req.query, false);
+        if (risks) {
+          const matchingBPs = new Set(risks.map((risk) => risk.businessPartner));
+          bps = bps.filter((bp) => matchingBPs.has(bp.BusinessPartner));
+        }
+        if (!isSingle) bps = _applyPaging(_sortPriorityBusinessPartners(bps), req.query);
       }
 
-      if (!bps || bps.length === 0) return bps;
+      if (!bps || bps.length === 0) return isSingle ? null : bps;
 
       // Enriquece cada BP com dados de risco da extensão local
       const bpKeys = bps.map((bp) => bp.BusinessPartner);
-      const risks = await db.run(
+      risks = risks || await db.run(
         SELECT.from(DB_RISK).where({ businessPartner: { in: bpKeys } })
       );
 
       const riskMap = {};
       risks.forEach((r) => (riskMap[r.businessPartner] = r));
 
-      return bps.map((bp) => {
+      const result = bps.map((bp) => {
         const risk = riskMap[bp.BusinessPartner] || {};
         return {
           ...bp,
@@ -234,6 +294,7 @@ module.exports = class CustomerService extends cds.ApplicationService {
           reviewDate: risk.reviewDate || null
         };
       });
+      return isSingle ? result[0] : result;
     });
 
     // ── setRisk action ────────────────────────────────────────────────
@@ -288,10 +349,14 @@ function _stripVirtualFields(query) {
 
 function _removeVirtualFilters(where, virtualFields) {
   if (!Array.isArray(where)) return where;
-  // Localiza e remove condições simples em campos virtuais
   const result = [];
   for (let i = 0; i < where.length; i++) {
     const token = where[i];
+    if (token?.xpr) {
+      const xpr = _removeVirtualFilters(token.xpr, virtualFields);
+      if (xpr) result.push({ ...token, xpr });
+      continue;
+    }
     if (token?.ref && virtualFields.has(token.ref[0])) {
       // Pula o campo, operador e valor (3 tokens: ref, op, val)
       i += 2;
@@ -303,11 +368,86 @@ function _removeVirtualFilters(where, virtualFields) {
       result.push(token);
     }
   }
-  return result.length > 0 ? result : undefined;
+
+  // Remove conectores que ficaram no início/fim ou duplicados após retirar
+  // um predicado virtual de uma expressão combinada.
+  const normalized = [];
+  for (const token of result) {
+    const isLogical = token === "and" || token === "or";
+    const previous = normalized[normalized.length - 1];
+    const previousIsLogical = previous === "and" || previous === "or";
+    if (isLogical && (normalized.length === 0 || previousIsLogical)) continue;
+    normalized.push(token);
+  }
+  if (normalized.at(-1) === "and" || normalized.at(-1) === "or") normalized.pop();
+  return normalized.length > 0 ? normalized : undefined;
+}
+
+// Extrai filtros de igualdade dos campos persistidos em CustomerRisk.
+// Condições OR do mesmo campo são consolidadas como uma lista de valores.
+function _extractVirtualEquals(where, result = new Map()) {
+  if (!Array.isArray(where)) return result;
+  const riskFields = new Set(["riskLevel", "segment", "riskReason", "owner", "reviewDate"]);
+
+  for (let i = 0; i < where.length; i++) {
+    const token = where[i];
+    if (token?.xpr) {
+      _extractVirtualEquals(token.xpr, result);
+      continue;
+    }
+    const field = token?.ref?.[0];
+    const operator = where[i + 1];
+    const value = where[i + 2]?.val;
+    if (riskFields.has(field) && operator === "=" && value !== undefined) {
+      if (!result.has(field)) result.set(field, new Set());
+      result.get(field).add(value);
+      i += 2;
+    }
+  }
+  return result;
+}
+
+function _addBusinessPartnerFilter(query, businessPartners) {
+  const predicate = [
+    { ref: ["BusinessPartner"] },
+    "in",
+    { list: businessPartners.map((businessPartner) => ({ val: businessPartner })) }
+  ];
+  query.SELECT.where = query.SELECT.where?.length
+    ? [{ xpr: query.SELECT.where }, "and", ...predicate]
+    : predicate;
+}
+
+function _addBusinessPartnerExclusion(query, businessPartners) {
+  const predicate = businessPartners.flatMap((businessPartner, index) => [
+    ...(index > 0 ? ["and"] : []),
+    { ref: ["BusinessPartner"] },
+    "!=",
+    { val: businessPartner }
+  ]);
+  query.SELECT.where = query.SELECT.where?.length
+    ? [{ xpr: query.SELECT.where }, "and", ...predicate]
+    : predicate;
+}
+
+function _asArray(result) {
+  if (Array.isArray(result)) return result;
+  return result ? [result] : [];
+}
+
+function _sortPriorityBusinessPartners(bps) {
+  const priority = new Map(
+    PRIORITY_BUSINESS_PARTNERS.map((businessPartner, index) => [businessPartner, index])
+  );
+  return [...bps].sort((left, right) => {
+    const leftPriority = priority.get(left.BusinessPartner) ?? Number.MAX_SAFE_INTEGER;
+    const rightPriority = priority.get(right.BusinessPartner) ?? Number.MAX_SAFE_INTEGER;
+    return leftPriority - rightPriority;
+  });
 }
 
 // Aplica filtros básicos nos dados mock locais
-function _applyMockFilters(bps, query) {
+function _applyMockFilters(bps, query, applyPaging = true) {
   let result = [...bps];
 
   const where = query?.SELECT?.where;
@@ -327,7 +467,31 @@ function _applyMockFilters(bps, query) {
     }
   }
 
-  // $top / $skip
-  const { top = 50, skip = 0 } = query?.SELECT?.limit || {};
-  return result.slice(Number(skip), Number(skip) + Number(top));
+  return applyPaging ? _applyPaging(result, query) : result;
+}
+
+function _applyPaging(result, query) {
+  const { top, skip } = _getPaging(query, 50);
+  return result.slice(skip, top === null ? undefined : skip + top);
+}
+
+function _getPaging(query, defaultTop = null) {
+  const limit = query?.SELECT?.limit;
+  const topValue = limit?.rows?.val ?? limit?.top;
+  const skipValue = limit?.offset?.val ?? limit?.skip ?? 0;
+  return {
+    top: topValue === undefined ? defaultTop : Number(topValue),
+    skip: Number(skipValue)
+  };
+}
+
+function _setPaging(query, top, skip) {
+  if (top === null) {
+    delete query.SELECT.limit;
+    return;
+  }
+  query.SELECT.limit = {
+    rows: { val: top },
+    ...(skip > 0 ? { offset: { val: skip } } : {})
+  };
 }
