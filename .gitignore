@@ -4,6 +4,9 @@ node_modules/
 # CAP build output
 gen/
 
+# UI5 build output
+app/*/dist/
+
 # SQLite (dev only)
 *.sqlite
 *.db
@@ -17,6 +20,10 @@ gen/
 mta_archives/
 .mta_build_tmp/
 *_mta_build_tmp/
+backend_only_mta.yaml
+
+# Legacy approuter lockfile (router is not part of the current MTA)
+app/router/package-lock.json
 
 # Playwright / test screenshots
 .playwright-mcp/

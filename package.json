@@ -17,7 +17,6 @@
     "passport": "^0.7"
   },
   "devDependencies": {
-    "@cap-js/sqlite": "^1",
     "@sap/cds-dk": "^10.0.7",
     "cds-plugin-ui5": "^0"
   },

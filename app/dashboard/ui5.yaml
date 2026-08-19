@@ -1,0 +1,22 @@
+specVersion: "3.0"
+metadata:
+  name: porto-seguro-dashboard-app
+type: application
+framework:
+  name: SAPUI5
+  version: "1.139.0"
+resources:
+  configuration:
+    propertiesFileSourceEncoding: UTF-8
+builder:
+  resources:
+    excludes:
+      - "/test/**"
+      - "/localService/**"
+  customTasks:
+    - name: ui5-task-zipper
+      afterTask: generateCachebusterInfo
+      configuration:
+        archiveName: dashboard
+        additionalFiles:
+          - xs-app.json

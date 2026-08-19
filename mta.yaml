@@ -1,7 +1,7 @@
 _schema-version: '3.1'
-ID: porto-seguro-customer-ext
+ID: porto-seguro-customer-ext-backend
 version: 1.0.0
-description: Porto Seguro – Extensão de Clientes S/4HANA via SAP BTP
+description: Porto Seguro – CAP backend and HTML5 applications for SAP Build Work Zone
 
 parameters:
   enable-parallel-deployments: true
@@ -11,7 +11,7 @@ build-parameters:
   before-all:
     - builder: custom
       commands:
-        - npm ci --production
+        - npm ci --legacy-peer-deps
         - npx cds build --production
 
 modules:
@@ -30,36 +30,78 @@ modules:
         properties:
           srv-url: ${default-url}
 
-  - name: ps-customer-ext-db-deployer
-    type: hdb
-    path: gen/db
-    parameters:
-      memory: 256M
-      disk-quota: 256M
-
-  - name: ps-customer-ext-html5-host
-    type: html5-apps-repo-host
-    path: app
-    properties:
-      content-target: true
-    requires:
-      - name: ps-customer-ext-uaa
-
   - name: ps-customer-ext-appcontent
     type: com.sap.application.content
     path: gen
     requires:
       - name: ps-customer-ext-destination
-      - name: ps-customer-ext-html5-host
+      - name: ps-customer-ext-html5-repo-host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: app/
+      requires:
+        - name: ps-customer-ext-clientes
+          artifacts:
+            - clientes.zip
+          target-path: app/
+        - name: ps-customer-ext-dashboard
+          artifacts:
+            - dashboard.zip
+          target-path: app/
+
+  - name: ps-customer-ext-clientes
+    type: html5
+    path: app/clientes
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm ci --legacy-peer-deps
+        - npm run build
+      supported-platforms: []
+
+  - name: ps-customer-ext-dashboard
+    type: html5
+    path: app/dashboard
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm ci --legacy-peer-deps
+        - npm run build
+      supported-platforms: []
+
+  - name: ps-customer-ext-destinationcontent
+    type: com.sap.application.content
     build-parameters:
       no-source: true
-
-  - name: ps-customer-ext-html5-runtime
-    type: html5-apps-repo-runtime
-    path: app
     requires:
       - name: ps-customer-ext-uaa
-      - name: ps-customer-ext-appcontent
+        parameters:
+          service-key:
+            name: ps-customer-ext-uaa-key
+      - name: ps-customer-ext-html5-repo-host
+        parameters:
+          service-key:
+            name: ps-customer-ext-html5-repo-host-key
+      - name: ps-customer-ext-destination
+        parameters:
+          content-target: true
+    parameters:
+      content:
+        instance:
+          existing_destinations_policy: update
+          destinations:
+            - Name: ps-customer-ext-html5-repository
+              ServiceInstanceName: ps-customer-ext-html5-repo-host
+              ServiceKeyName: ps-customer-ext-html5-repo-host-key
+              sap.cloud.service: portoseguro.customer.service
+            - Name: ps-customer-ext-uaa
+              Authentication: OAuth2UserTokenExchange
+              ServiceInstanceName: ps-customer-ext-uaa
+              ServiceKeyName: ps-customer-ext-uaa-key
+              sap.cloud.service: portoseguro.customer.service
 
 resources:
   - name: ps-customer-ext-uaa
@@ -69,31 +111,44 @@ resources:
       service-plan: application
       path: ./xs-security.json
       config:
-        xsappname: porto-seguro-customer-ext-${org}-${space}
+        xsappname: porto-seguro-customer-ext-backend
         tenant-mode: dedicated
+
+  - name: ps-customer-ext-db
+    type: org.cloudfoundry.existing-service
+    parameters:
+      service-name: ps-customer-ext-db
+
+  - name: ps-customer-ext-html5-repo-host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-host
+
+  - name: ps-customer-ext-html5-repo-runtime
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-runtime
 
   - name: ps-customer-ext-destination
     type: org.cloudfoundry.managed-service
+    requires:
+      - name: srv-api
     parameters:
       service: destination
       service-plan: lite
-
-  - name: ps-customer-ext-connectivity
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: connectivity
-      service-plan: lite
-
-  - name: ps-customer-ext-db
-    type: com.sap.xs.hana-schema
-    path: gen/db
-    parameters:
-      service: hana
-      service-plan: hdi-shared
-    requires:
-      - hana-cloud-tools
-
-  - name: hana-cloud-tools
-    type: org.cloudfoundry.existing-service
-    parameters:
-      service-name: hana-cloud
+      config:
+        version: 1.0.0
+        HTML5Runtime_enabled: true
+        init_data:
+          instance:
+            existing_destinations_policy: update
+            destinations:
+              - Name: ps-customer-ext-srv
+                URL: ~{srv-api/srv-url}
+                Authentication: NoAuthentication
+                Type: HTTP
+                ProxyType: Internet
+                HTML5.ForwardAuthToken: true
+                HTML5.DynamicDestination: true
